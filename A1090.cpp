@@ -1,77 +1,47 @@
-//要按照路径的字典序排列输出  
-//路径：DFS
-//树：静态数组
-//字典序：sort(pointer begin, pointer end, cmp)
-//对序列的排序输出思路不一定是用优先队列存储序列，可以是sort函数，对序列进行排序输出，写法与优先队列类似，可以自己定义比较函数（不用写struct来重载，只需要写一个cmp函数）
+//只需要计算出每个节点的深度即可，因为每层节点的深度是一样的。
+//子节点的深度是父节点的深度加1，所以用DFS
+
 #include<bits/stdc++.h>
 using namespace std;
-int N, M, S, sum = 0, W, ROOT, Count[100];
-
-vector<int> tmp;
-
+int N, Count[100010];
+double P, r;
 struct node{
-    int w;
+    int level;
     vector<int> child;
-    
-}Node[100];
-void DFS(int root){   //树的先根遍历就是深度优先搜索
-    int size = Node[root].child.size();
-    if(sum == S && !size){
-        if(root == ROOT) {cout<<W<<endl;return;}
-        cout<<W<<" ";
-        for(int i=0;i<tmp.size();i++){
-            cout<<Node[tmp[i]].w;
-            if(i < tmp.size()-1) cout<<" ";
-        }
-        cout<<endl;
-        return;
-    }
-    if(!Node[root].child.size() || sum > S) return;
-    for(int i=0;i<size;i++){
-        tmp.push_back(Node[root].child[i]);
-        sum += Node[Node[root].child[i]].w;
+}Node[100010];
+void DFS(int root)
+{   
+    for(int i=0;i<Node[root].child.size();i++){
+        Node[Node[root].child[i]].level = Node[root].level + 1;
         DFS(Node[root].child[i]);
-        sum -= Node[Node[root].child[i]].w;
-        tmp.pop_back();
-    }  
+    }
 }
-int Root(){
-    for(int i=0;i<M;i++)
-        if(Count[i] == 0) return i;
+double pow(int n)
+{   
+    double p = P;
+    for(int i=0;i<n;i++) p *= (1+r);
+    return p;
 }
-bool cmp(int a, int b){
-    return Node[a].w > Node[b].w;
-}
+int Root;
 int main()
 {
-    cin>>N>>M>>S;
-    int w, id, c;
-    for(int i=0;i<N;i++)
-        cin>>Node[i].w;
-    for(int i=0;i<M;i++){
-        cin>>id>>c; //id和儿子数量
-        int a;
-        for(int j=0;j<c;j++) {cin>>a;Node[id].child.push_back(a);Count[a]++;}
-        sort(Node[id].child.begin(), Node[id].child.end(), cmp);
+    cin>>N>>P>>r;
+    r /= 100;
+    int sup;
+    vector<int> RootSon;
+    for(int i=0;i<N;i++){
+        cin>>sup;
+        if(sup == -1) {Root = i;continue;}
+        Node[sup].child.push_back(i);
     }
-
-    ROOT = Root();
-    sum += Node[ROOT].w;
-    W = sum;
-    DFS(ROOT);
+    Node[Root].level = 0;
+    DFS(Root);
+    int level = 0, count = 0;
+    for(int i=0;i<N;i++){
+        if(Node[i].level > level) {level = Node[i].level;count = 1;}
+        else if(Node[i].level == level) count++;
+    }
+    printf("%.2f %d", pow(level), count);
+    cout<<endl;
     system("pause");
-    return 0;
 }
-/*
-20 9 24
-10 2 4 3 5 10 2 18 9 7 2 2 1 3 12 1 8 6 2 2
-00 4 01 02 03 04
-02 1 05
-04 2 06 07
-03 3 11 12 13
-06 1 09
-07 2 08 10
-16 1 15
-13 3 14 16 17
-17 2 18 19
-*/
